@@ -1,6 +1,8 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
-import {PostContentInterface, useDataGetting} from "../../hooks/useDataGetting";
+import React, {useCallback, useEffect, useRef, useState} from "react";
+import {useDataGetting} from "../../module/PostsWall/usecase/useDataGetting";
 import styled from "@emotion/styled";
+import {DetailPage} from "./DetailPage";
+import Loading from "./Loading";
 
 const Base = styled.div`
   display: flex;
@@ -44,78 +46,15 @@ const CardTitle = styled.h2`
 const CardImageBlock = styled.div`
   width: 90%;
   height: 80%;
-  min-height: 80%;
-  max-height: 80%;
   display: flex;
   justify-content: center;
   overflow: hidden;
   margin-bottom: 10px;
 
   & img {
+    width: 100%;
     height: 100%;
-    min-height: 100%;
-    max-height: 100%;
-  }
-`
-
-
-const Loading = styled.div`
-  position: absolute;
-  display: flex;
-  top: 50%;
-  left: 44%;
-  background-color: rgba(151, 151, 151, 0.6);
-  width: 150px;
-  height: 80px;
-  justify-content: center;
-  align-items: center;
-  border-radius: 8px;
-
-  & div {
-    display: flex;
-    position: relative;
-    width: 80px;
-    height: 70px;
-  }
-
-  & div div {
-    display: inline-block;
-    position: absolute;
-    left: 8px;
-    width: 16px;
-    background: rgba(255, 255, 255, 0.73);
-    animation: lds-facebook 1.2s infinite;
-  }
-
-  & div div:nth-of-type(1) {
-    left: 8px;
-    animation-delay: -0.24s;
-  }
-
-  & div div:nth-of-type(2) {
-    left: 32px;
-    animation-delay: -0.12s;
-  }
-
-  & div div:nth-of-type(3) {
-    left: 56px;
-    animation-delay: 0s;
-  }
-
-  @keyframes lds-facebook {
-    0% {
-      top: 16px;
-      height: 44px;
-    }
-    25% {
-      top: 8px;
-      height: 64px;
-    }
-    50%,
-    100% {
-      top: 24px;
-      height: 32px;
-    }
+    object-fit: contain;
   }
 `;
 
@@ -157,129 +96,94 @@ const NothingMoreBlock = styled.div`
   top: 40%;
   border-radius: 8px;
 `;
-
 const InfiniteScroll = () => {
-    const limit = useRef(20);
-    const [offset, setOffset] = useState(0);
+    const offset = useRef(0);
+
     const [urlPath, setUrlPath] = useState<string>(
-        `${process.env.REACT_APP_API}&offset=${offset}&limit=${limit.current}`
+        `${process.env.REACT_APP_API}&offset=${offset.current}`
     );
 
     const {assets, hasMore, isLoading, error} = useDataGetting(urlPath);
-    const assetsArray = useMemo(() =>
-            assets.length > 0 && !error
-                ? assets.map((item: PostContentInterface) => {
-                    const {id, token_id, asset_contract, image_preview_url, name} = item;
-                    return {
-                        id,
-                        token_id,
-                        address: asset_contract.address,
-                        image_preview_url,
-                        name
-                    };
-                })
-                : [
-                    {
-                        id: "0",
-                        token_id: "0",
-                        address: "00000AAAAAAA",
-                        name: "empty",
-                        image_preview_url: undefined,
-                    }
-                ]
-        , [assets, error]);
+    // const assetsArray = useMemo(() =>
+    //         assets.length > 0 && !error
+    //             ? assets.map((item: PostContentInterface) => {
+    //                 const {id, token_id, asset_contract, image_preview_url, name} = item;
+    //                 return {
+    //                     id,
+    //                     token_id,
+    //                     address: asset_contract.address,
+    //                     image_preview_url,
+    //                     name
+    //                 };
+    //             })
+    //             : [
+    //                 // {
+    //                 //     id: "0",
+    //                 //     token_id: "0",
+    //                 //     address: "00000AAAAAAA",
+    //                 //     name: "empty",
+    //                 //     image_preview_url: undefined,
+    //                 // }
+    //             ]
+    //     , [assets, error]);
     const observer = useRef<null | IntersectionObserver>();
     const lastPostBlock = useCallback(
         (lastNode) => {
             observer.current && observer.current.disconnect();
             observer.current = new IntersectionObserver(
                 (entries) => {
-                    if(entries[0].isIntersecting) {
-                        limit.current = limit.current <= 40 ? limit.current + 10 : limit.current < 50 ? 50 : 20;
-                        assetsArray[0].id !== 0 && setUrlPath(
-                            `https://api.opensea.io/api/v1/assets?order_direction=desc&limit=${limit.current}&owner=0x960DE9907A2e2f5363646d48D7FB675Cd2892e91&offset=${offset}`
+                    if(entries[0].isIntersecting && hasMore) {
+                        offset.current = (offset.current + 1);
+                        setUrlPath(
+                            `${process.env.REACT_APP_API}&offset=${offset.current * 20}`
                         );
                     }
                 },
                 {threshold: 0.8}
             );
-            lastNode && observer.current?.observe(lastNode);
+            hasMore && lastNode && observer.current?.observe(lastNode);
         },
-        [assetsArray, offset]
+        [hasMore]
     );
-
-    const [backToTopButtonVisibility, setBackToTopButtonVisibility] = useState<"flex" | "none">("none");
-    const topObserver = useRef<null | IntersectionObserver>();
-    const firstPostBlock = useCallback((firstNode) => {
-        topObserver.current = new IntersectionObserver((entries) => {
-            !entries[0].isIntersecting && setBackToTopButtonVisibility("flex");
-            entries[0].isIntersecting && setBackToTopButtonVisibility("none");
-        });
-        topObserver.current?.observe(firstNode);
-    }, []);
 
     const [showNoContentBlock, setShowNoContentBlock] =
         useState<boolean>(false);
     useEffect(() => {
-        !hasMore && setShowNoContentBlock(true);
-        !hasMore && setTimeout(() => setShowNoContentBlock(false), 3000);
+        if(!hasMore) {
+            setShowNoContentBlock(true);
+            setTimeout(() => setShowNoContentBlock(false), 3000);
+        }
     }, [hasMore]);
 
 
+    const [isShowDetailPage, setIsShowDetailPage] = useState(false);
     const contract_address = useRef("");
     const token_id = useRef("");
     const handleCardClick = (address: string, tokenId: string) => {
+        setIsShowDetailPage(true);
         contract_address.current = address;
         token_id.current = tokenId;
     }
 
     return (
         <Base>
-            {isLoading && (
-                <Loading>
-                    <div>
-                        <div/>
-                        <div/>
-                        <div/>
-                    </div>
-                </Loading>
+            {isLoading && <Loading/>}
+            {assets.map((item, index: number) =>
+                <Card key={`${item.name}_${item.id}_${index}`} ref={assets.length === index + 1 ? lastPostBlock : null}
+                      onClick={() => {
+                          handleCardClick(item.address, item.token_id)
+                      }}>
+                    <CardImageBlock>
+                        {item.image_preview_url && <img src={item.image_preview_url} alt={item.name}/>}
+                    </CardImageBlock>
+                    <CardTitle>{item.name}</CardTitle>
+                </Card>
             )}
-            {assetsArray.map((item, index: number) =>
-                assetsArray.length === index + 1 ? (
-                    <Card key={`${item.name}_${item.id}`} ref={lastPostBlock} onClick={() => {
-                        handleCardClick(item.address, item.token_id)
-                    }}>
-                        <CardImageBlock>
-                            {item.image_preview_url && <img src={item.image_preview_url} alt={item.name}/>}
-                        </CardImageBlock>
-                        <CardTitle>{item.name}</CardTitle>
-                    </Card>
-                ) : index === 0 ? (
-                    <Card id="top" key={`${item.name}_${item.id}`} ref={firstPostBlock} onClick={() => {
-                        handleCardClick(item.address, item.token_id)
-                    }}>
-                        <CardImageBlock>
-                            {item.image_preview_url && <img src={item.image_preview_url} alt={item.name}/>}
-                        </CardImageBlock>
-                        <CardTitle>{item.name}</CardTitle>
-                    </Card>
-                ) : (
-                    <Card key={`${item.name}_${item.id}`} onClick={() => {
-                        handleCardClick(item.address, item.token_id)
-                    }}>
-                        <CardImageBlock>
-                            {item.image_preview_url && <img src={item.image_preview_url} alt={item.name}/>}
-                        </CardImageBlock>
-                        <CardTitle>{item.name}</CardTitle>
-                    </Card>
-                )
-            )}
-            <BackToTopButton visibility={backToTopButtonVisibility} href="#top">
-                TOP
-            </BackToTopButton>
             {showNoContentBlock && (
                 <NothingMoreBlock>抱歉，暫時沒有更多內容</NothingMoreBlock>
             )}
+            {isShowDetailPage && <DetailPage contract_address={contract_address.current} token_id={token_id.current}
+                                             handleDetailPageVisibility={setIsShowDetailPage}/>}
         </Base>
     );
 };
