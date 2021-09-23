@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "@emotion/styled";
+import InfiniteScroll from "../../../components/atom/InfiniteScroll";
 
 const Base = styled.div`
     position: relative;
@@ -16,7 +17,7 @@ const Base = styled.div`
 const PostsWall = () => {
     return (
         <Base>
-            PostWall
+            <InfiniteScroll />
         </Base>
     );
 };
