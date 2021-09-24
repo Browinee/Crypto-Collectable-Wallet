@@ -29,6 +29,7 @@ const Card = styled.div`
   height: 40%;
   box-shadow: #2e8484 0px 0px 2px;
   margin-bottom: 10px;
+  font-size: 0.8rem;
 
   &:hover {
     background-color: rgba(203, 203, 203, 0.45);
@@ -78,7 +79,7 @@ const InfiniteScroll = () => {
         `${process.env.REACT_APP_API}&offset=${offset.current}`
     );
 
-    const {assets, hasMore, isLoading } = useDataGetting(urlPath);
+    const {assets, hasMore, isLoading} = useDataGetting(urlPath);
     const observer = useRef<null | IntersectionObserver>();
     const lastPostBlock = useCallback(
         (lastNode) => {
@@ -139,8 +140,9 @@ const InfiniteScroll = () => {
             {showNoContentBlock && (
                 <NothingMoreBlock>抱歉，暫時沒有更多內容</NothingMoreBlock>
             )}
-            {isShowDetailPage && <DetailPage contract_address={selectedItem.contract_address} token_id={selectedItem.token_id}
-                                             handleDetailPageVisibility={setIsShowDetailPage}/>}
+            {isShowDetailPage &&
+            <DetailPage contract_address={selectedItem.contract_address} token_id={selectedItem.token_id}
+                        handleDetailPageVisibility={setIsShowDetailPage}/>}
         </Base>
     );
 };

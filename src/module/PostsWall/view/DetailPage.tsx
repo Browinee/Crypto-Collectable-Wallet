@@ -2,6 +2,7 @@ import React, {useCallback} from "react";
 import {useDetailGetting} from "../usecase/useDetailGetting";
 import styled from "@emotion/styled";
 import Loading from "../../../components/atom/Loading";
+import {ArrowLeft} from "../../../components/atom/Arrow";
 
 const StyledDetailPage = styled.div`
   position: absolute;
@@ -43,7 +44,9 @@ const ImgBlock = styled.div`
   align-items: center;
 
   & img {
-    height: 100%;
+    width: 100%;
+    height: 500px;
+    object-fit: contain;
   }
 `;
 
@@ -80,17 +83,7 @@ const PermaLinkButton = styled.button`
   cursor: pointer;
   font-size: 14px;
 `
-const CloseButton = styled.div`
-  position: absolute;
-  right: 16px;
-  top: 16px;
-  opacity: 0.3;
-  cursor: pointer;
 
-  &:hover {
-    opacity: 1;
-  }
-`;
 export const DetailPage = (props: { contract_address: string, token_id: string, handleDetailPageVisibility: Function }) => {
     const {handleDetailPageVisibility, contract_address, token_id} = props;
     const {
@@ -106,14 +99,14 @@ export const DetailPage = (props: { contract_address: string, token_id: string, 
     }, [handleDetailPageVisibility]);
     return (
         <>
-            {isLoading &&  <Loading/>}
+            {isLoading && <Loading/>}
             <StyledDetailPage>
                 <Card>
                     <CollectionNameBlock>
                         {collectionName}
                     </CollectionNameBlock>
                     <ImgBlock>
-                        <img src={imgUrl} alt={name}/>
+                        <img  src={imgUrl !== "" ? imgUrl : undefined} alt={name}/>
                     </ImgBlock>
                     <NameBlock>
                         {name}
@@ -128,9 +121,7 @@ export const DetailPage = (props: { contract_address: string, token_id: string, 
                             permalink
                         </PermaLinkButton>
                     </PermaLinkButtonBlock>
-                    <CloseButton onClick={handleClose}>
-                        X
-                    </CloseButton>
+                    <ArrowLeft handleClose={handleClose}/>
                 </Card>
             </StyledDetailPage>
 
