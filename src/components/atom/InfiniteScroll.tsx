@@ -160,6 +160,7 @@ const InfiniteScroll = () => {
     const contract_address = useRef("");
     const token_id = useRef("");
     const handleCardClick = (address: string, tokenId: string) => {
+        console.log("123")
         setIsShowDetailPage(true);
         contract_address.current = address;
         token_id.current = tokenId;
