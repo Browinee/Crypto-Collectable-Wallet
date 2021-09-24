@@ -1,8 +1,8 @@
 import React, {useCallback, useEffect, useRef, useState} from "react";
-import {useDataGetting} from "../../module/PostsWall/usecase/useDataGetting";
+import {useDataGetting} from "../usecase/useDataGetting";
 import styled from "@emotion/styled";
 import {DetailPage} from "./DetailPage";
-import Loading from "./Loading";
+import Loading from "../../../components/atom/Loading";
 
 const Base = styled.div`
   display: flex;
@@ -58,31 +58,6 @@ const CardImageBlock = styled.div`
   }
 `;
 
-interface BackToTopButtonProps {
-    visibility: "flex" | "none";
-}
-
-const BackToTopButton = styled.a<BackToTopButtonProps>`
-  position: absolute;
-  bottom: 20px;
-  right: 26.5%;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background-color: rgba(56, 99, 158, 0.66);
-  display: ${(props) => props.visibility};
-  justify-content: center;
-  align-items: center;
-  text-decoration: none;
-  color: white;
-  font-weight: 900;
-  cursor: pointer;
-
-  &:hover {
-    background-color: rgb(177, 231, 253);
-  }
-`;
-
 const NothingMoreBlock = styled.div`
   position: absolute;
   width: 40%;
@@ -103,29 +78,7 @@ const InfiniteScroll = () => {
         `${process.env.REACT_APP_API}&offset=${offset.current}`
     );
 
-    const {assets, hasMore, isLoading, error} = useDataGetting(urlPath);
-    // const assetsArray = useMemo(() =>
-    //         assets.length > 0 && !error
-    //             ? assets.map((item: PostContentInterface) => {
-    //                 const {id, token_id, asset_contract, image_preview_url, name} = item;
-    //                 return {
-    //                     id,
-    //                     token_id,
-    //                     address: asset_contract.address,
-    //                     image_preview_url,
-    //                     name
-    //                 };
-    //             })
-    //             : [
-    //                 // {
-    //                 //     id: "0",
-    //                 //     token_id: "0",
-    //                 //     address: "00000AAAAAAA",
-    //                 //     name: "empty",
-    //                 //     image_preview_url: undefined,
-    //                 // }
-    //             ]
-    //     , [assets, error]);
+    const {assets, hasMore, isLoading } = useDataGetting(urlPath);
     const observer = useRef<null | IntersectionObserver>();
     const lastPostBlock = useCallback(
         (lastNode) => {
@@ -141,7 +94,7 @@ const InfiniteScroll = () => {
                 },
                 {threshold: 0.8}
             );
-            hasMore && lastNode && observer.current?.observe(lastNode);
+            lastNode && observer.current?.observe(lastNode);
         },
         [hasMore]
     );
@@ -157,12 +110,16 @@ const InfiniteScroll = () => {
 
 
     const [isShowDetailPage, setIsShowDetailPage] = useState(false);
-    const contract_address = useRef("");
-    const token_id = useRef("");
-    const handleCardClick = (address: string, tokenId: string) => {
+    const [selectedItem, setSelectedItem] = useState({
+        contract_address: "",
+        token_id: ""
+    })
+    const handleCardClick = (address: string, token_id: string) => {
         setIsShowDetailPage(true);
-        contract_address.current = address;
-        token_id.current = tokenId;
+        setSelectedItem({
+            contract_address: address,
+            token_id,
+        })
     }
 
     return (
@@ -182,7 +139,7 @@ const InfiniteScroll = () => {
             {showNoContentBlock && (
                 <NothingMoreBlock>抱歉，暫時沒有更多內容</NothingMoreBlock>
             )}
-            {isShowDetailPage && <DetailPage contract_address={contract_address.current} token_id={token_id.current}
+            {isShowDetailPage && <DetailPage contract_address={selectedItem.contract_address} token_id={selectedItem.token_id}
                                              handleDetailPageVisibility={setIsShowDetailPage}/>}
         </Base>
     );

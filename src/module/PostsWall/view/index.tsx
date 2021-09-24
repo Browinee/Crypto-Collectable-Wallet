@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "@emotion/styled";
-import InfiniteScroll from "../../../components/atom/InfiniteScroll";
+import InfiniteScroll from "./InfiniteScroll";
 
 const Base = styled.div`
     position: relative;

@@ -1,7 +1,7 @@
 import React, {useCallback} from "react";
-import {useDetailGetting} from "../../hooks/useDetailGetting";
+import {useDetailGetting} from "../usecase/useDetailGetting";
 import styled from "@emotion/styled";
-import Loading from "./Loading";
+import Loading from "../../../components/atom/Loading";
 
 const StyledDetailPage = styled.div`
   position: absolute;
@@ -104,7 +104,6 @@ export const DetailPage = (props: { contract_address: string, token_id: string, 
     const handleClose = useCallback(() => {
         handleDetailPageVisibility(false)
     }, [handleDetailPageVisibility]);
-    console.log(isLoading)
     return (
         <>
             {isLoading &&  <Loading/>}
