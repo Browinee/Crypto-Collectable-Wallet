@@ -29,21 +29,19 @@ export const useDataGetting = (
         fetch(urlPath)
             .then((response) => response.json())
             .then((data) => {
-                if(data) {
-                    const transformedData = assetAdapter(data.assets);
-                    setAssets(prev => {
-                        return [...prev, ...transformedData];
-                    });
-                }
-
-                setIsLoading(false);
+                const transformedData = assetAdapter(data.assets);
+                setAssets(prev => {
+                    return [...prev, ...transformedData];
+                });
                 setHasMore(data.assets.length > 0);
             })
             .catch((err) => {
                 console.info(`%c${err}`, "color: red");
                 setError(true);
+            })
+            .finally(() => {
                 setIsLoading(false);
-            });
+            })
     }, [urlPath]);
 
     return {assets, hasMore, error, isLoading};
