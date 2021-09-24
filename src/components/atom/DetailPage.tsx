@@ -1,6 +1,7 @@
 import React, {useCallback} from "react";
 import {useDetailGetting} from "../../hooks/useDetailGetting";
 import styled from "@emotion/styled";
+import Loading from "./Loading";
 
 const StyledDetailPage = styled.div`
   position: absolute;
@@ -97,37 +98,43 @@ export const DetailPage = (props: { contract_address: string, token_id: string, 
         name,
         description,
         imgUrl,
-        permalink
+        permalink,
+        isLoading,
     } = useDetailGetting(contract_address, token_id);
     const handleClose = useCallback(() => {
         handleDetailPageVisibility(false)
     }, [handleDetailPageVisibility]);
+    console.log(isLoading)
     return (
-        <StyledDetailPage>
-            <Card>
-                <CollectionNameBlock>
-                    {collectionName}
-                </CollectionNameBlock>
-                <ImgBlock>
-                    <img src={imgUrl} alt={name}/>
-                </ImgBlock>
-                <NameBlock>
-                    {name}
-                </NameBlock>
-                <DescriptionBlock>
-                    {description}
-                </DescriptionBlock>
-                <PermaLinkButtonBlock>
-                    <PermaLinkButton onClick={() => {
-                        window.open(permalink)
-                    }}>
-                        permalink
-                    </PermaLinkButton>
-                </PermaLinkButtonBlock>
-                <CloseButton onClick={handleClose}>
-                    X
-                </CloseButton>
-            </Card>
-        </StyledDetailPage>
+        <>
+            {isLoading &&  <Loading/>}
+            <StyledDetailPage>
+                <Card>
+                    <CollectionNameBlock>
+                        {collectionName}
+                    </CollectionNameBlock>
+                    <ImgBlock>
+                        <img src={imgUrl} alt={name}/>
+                    </ImgBlock>
+                    <NameBlock>
+                        {name}
+                    </NameBlock>
+                    <DescriptionBlock>
+                        {description}
+                    </DescriptionBlock>
+                    <PermaLinkButtonBlock>
+                        <PermaLinkButton onClick={() => {
+                            window.open(permalink)
+                        }}>
+                            permalink
+                        </PermaLinkButton>
+                    </PermaLinkButtonBlock>
+                    <CloseButton onClick={handleClose}>
+                        X
+                    </CloseButton>
+                </Card>
+            </StyledDetailPage>
+
+        </>
     )
 }

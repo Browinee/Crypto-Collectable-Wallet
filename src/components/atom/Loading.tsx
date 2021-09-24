@@ -12,6 +12,7 @@ const Container = styled.div`
   justify-content: center;
   align-items: center;
   border-radius: 8px;
+  z-index: 3;
 
   & div {
     display: flex;
