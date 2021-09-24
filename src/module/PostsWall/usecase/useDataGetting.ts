@@ -26,14 +26,7 @@ export const useDataGetting = (
 
     useEffect(() => {
         setIsLoading(true);
-        fetch(urlPath, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json; charset=utf-8",
-            },
-            mode: "cors",
-            credentials: "include",
-        })
+        fetch(urlPath)
             .then((response) => response.json())
             .then((data) => {
                 if(data) {

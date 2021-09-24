@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 
 interface DetailDataInterface {
-    collection: {name: string};
+    collection: { name: string };
     name: string;
     image_original_url: string;
     description: string;
@@ -18,21 +18,18 @@ interface UseDetailGettingResponse {
 }
 
 export const useDetailGetting = (contract_address: string, token_id: string): UseDetailGettingResponse => {
-    const [detailData, setDetailData] = useState<DetailDataInterface>({collection: {name: ""}, name: "", image_original_url: "", description: "", permalink: ""});
+    const [detailData, setDetailData] = useState<DetailDataInterface>({
+        collection: {name: ""},
+        name: "",
+        image_original_url: "",
+        description: "",
+        permalink: ""
+    });
     const [isLoading, setIsLoading] = useState(false);
     useEffect(() => {
-        const urlPath = `https://api.opensea.io/api/v1/asset/${contract_address}/${token_id}`;
+        const urlPath = `${process.env.REACT_APP_DETAIL_API}/${contract_address}/${token_id}`;
         setIsLoading(true);
-        fetch(
-            urlPath, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json; charset=utf-8",
-                },
-                mode: "cors",
-                credentials: "include",
-            }
-        )
+        fetch(urlPath)
             .then(response => response.json())
             .then(data => {
                 setDetailData(data);
@@ -45,5 +42,12 @@ export const useDetailGetting = (contract_address: string, token_id: string): Us
             })
 
     }, [contract_address, token_id])
-    return {isLoading, collectionName: detailData.collection.name, name: detailData.name, imgUrl: detailData.image_original_url, description: detailData.description, permalink: detailData.permalink }
+    return {
+        isLoading,
+        collectionName: detailData.collection.name,
+        name: detailData.name,
+        imgUrl: detailData.image_original_url,
+        description: detailData.description,
+        permalink: detailData.permalink
+    }
 }
